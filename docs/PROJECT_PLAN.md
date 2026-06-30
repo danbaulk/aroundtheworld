@@ -1,6 +1,6 @@
 # Around the World — Plan
 
-_Last updated: 2026-06-29 · Status: Phase 1 built (local prototype runs)_
+_Last updated: 2026-06-29 · Status: Phases 1–2 built (local prototype runs)_
 
 ## What this is
 Around the World is a local-first web app for tracking your worldwide travel progress. The
@@ -129,3 +129,11 @@ checklist and airport-timeline tools.
   `src/data/countries.generated.ts` (a3, ISO-numeric id, name, 7-continent, subregion, flag); the
   "% of the world" denominator is the 194 UN-member countries.
 - 2026-06-29 — A fresh scratch map starts **blank** (no demo seed), unlike pantry/gymbuddy.
+- 2026-06-29 — **Phase 2 (Gamification) built and verified locally** on `feat/gamification`: dated
+  passport timeline, milestone badges, curated challenges with auto-progress, and a map dart throw.
+- 2026-06-29 — Badges, challenge progress, passport timeline and the dart pick are **pure
+  derivations** over `state.countries` (`src/data/badges.ts`, `src/data/challenges.ts`,
+  `src/selectors.ts`) — **no schema change**, `TravelData` stays `version: 1`.
+- 2026-06-29 — Layout: **dart lives on the Map** (picks an unvisited country, reuses `CountryPanel`
+  to wishlist it); **badges + challenges on the Challenges tab**; **Passport** is purely the dated
+  stamp timeline, grouped by year (chronological).

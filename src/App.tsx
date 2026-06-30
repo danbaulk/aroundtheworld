@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { TravelProvider } from './store'
 import MapTab from './components/MapTab'
+import PassportTab from './components/PassportTab'
+import ChallengesTab from './components/ChallengesTab'
 import ComingSoon from './components/ComingSoon'
 
 type Tab = 'map' | 'passport' | 'challenges' | 'tips'
@@ -26,9 +28,9 @@ export default function App() {
           {tab === 'map' ? (
             <MapTab />
           ) : tab === 'passport' ? (
-            <ComingSoon label="Passport" />
+            <PassportTab />
           ) : tab === 'challenges' ? (
-            <ComingSoon label="Challenges" />
+            <ChallengesTab />
           ) : (
             <ComingSoon label="Travel Tips" />
           )}
