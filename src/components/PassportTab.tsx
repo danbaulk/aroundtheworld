@@ -1,12 +1,15 @@
+import { useState } from 'react'
 import { useTravel } from '../travelContext'
-import { computeStats } from '../reducer'
 import { passportByYear } from '../selectors'
+import VisitNotes from './VisitNotes'
 
-// The passport book: one dated stamp per visited country, laid out on a chronological timeline.
+// The passport book: one dated stamp per visit, laid out on a chronological timeline.
+// Tap a stamp to open its notes & photos.
 export default function PassportTab() {
   const { state } = useTravel()
   const years = passportByYear(state)
-  const { visitedCount } = computeStats(state)
+  const stampCount = years.reduce((n, y) => n + y.stamps.length, 0)
+  const [open, setOpen] = useState<{ a3: string; visitId: string } | null>(null)
 
   if (years.length === 0) {
     return (
@@ -20,7 +23,7 @@ export default function PassportTab() {
   return (
     <div className="h-full overflow-y-auto p-3">
       <p className="mb-3 text-sm text-slate-500">
-        {visitedCount} {visitedCount === 1 ? 'stamp' : 'stamps'} in your passport
+        {stampCount} {stampCount === 1 ? 'stamp' : 'stamps'} in your passport
       </p>
       <div className="flex flex-col gap-5">
         {years.map(({ year, stamps }) => (
@@ -28,20 +31,23 @@ export default function PassportTab() {
             <h2 className="mb-2 text-sm font-bold text-slate-700">{year}</h2>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
               {stamps.map((s) => (
-                <div
-                  key={s.a3}
-                  className="flex items-center gap-2 rounded-xl bg-white px-3 py-2 shadow-sm ring-1 ring-slate-200"
+                <button
+                  key={s.visitId}
+                  onClick={() => setOpen({ a3: s.a3, visitId: s.visitId })}
+                  className="flex items-center gap-2 rounded-xl bg-white px-3 py-2 text-left shadow-sm ring-1 ring-slate-200 transition hover:ring-sky-300"
                 >
                   <span className="text-2xl" aria-hidden>
                     {s.flag}
                   </span>
                   <span className="text-sm font-medium text-slate-700">{s.name}</span>
-                </div>
+                </button>
               ))}
             </div>
           </section>
         ))}
       </div>
+
+      {open && <VisitNotes a3={open.a3} visitId={open.visitId} onClose={() => setOpen(null)} />}
     </div>
   )
 }
