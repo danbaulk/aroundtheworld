@@ -3,7 +3,7 @@
 import type { TravelData } from './types'
 
 const STORAGE_KEY = 'aroundtheworld:data'
-const CURRENT_VERSION = 1 as const
+const CURRENT_VERSION = 2 as const
 
 /** A scratch map starts blank — there is no demo seed (you scratch off your own countries). */
 export function defaultState(): TravelData {
@@ -14,12 +14,30 @@ type AnyBlob = { version?: number } & Record<string, unknown>
 
 function step(blob: AnyBlob): AnyBlob {
   switch (blob.version) {
-    // Version 1 is the only shape, so there are no upgrade steps yet. When the shape changes,
-    // bump CURRENT_VERSION and add `case 1:` here returning the next blob, so an old saved map
-    // upgrades one step at a time instead of being reset.
+    // v1 → v2: one `visitedYear` per country becomes an array of dated visits, each with its
+    // own notes. Visited countries gain a single visit carrying the old year; wishlist entries
+    // are untouched. The malformed-field coercion below keeps this defensive.
+    case 1:
+      return migrateV1toV2(blob)
     default:
       throw new Error(`Unsupported aroundtheworld data version: ${blob.version}`)
   }
+}
+
+/** v1 CountryEntry was { status, visitedYear? }; v2 is { status, visits? }. */
+function migrateV1toV2(blob: AnyBlob): AnyBlob {
+  const countries = hasValidCountries(blob.countries) ? blob.countries : {}
+  const next: Record<string, unknown> = {}
+  for (const [a3, raw] of Object.entries(countries)) {
+    const entry = raw as { status?: unknown; visitedYear?: unknown }
+    if (entry?.status === 'visited') {
+      const year = typeof entry.visitedYear === 'number' ? entry.visitedYear : 0
+      next[a3] = { status: 'visited', visits: [{ id: crypto.randomUUID(), year }] }
+    } else if (entry?.status === 'wishlist') {
+      next[a3] = { status: 'wishlist' }
+    }
+  }
+  return { version: 2, countries: next }
 }
 
 function hasValidCountries(value: unknown): value is Record<string, unknown> {

@@ -5,11 +5,35 @@ import type { Continent } from './data/countries'
 
 export function travelReducer(state: TravelData, action: Action): TravelData {
   switch (action.type) {
-    case 'setVisited':
+    case 'addVisit': {
+      const existing = state.countries[action.a3]
+      const prevVisits = existing?.status === 'visited' ? existing.visits ?? [] : []
       return {
         ...state,
-        countries: { ...state.countries, [action.a3]: { status: 'visited', visitedYear: action.year } },
+        countries: {
+          ...state.countries,
+          [action.a3]: { status: 'visited', visits: [...prevVisits, action.visit] },
+        },
       }
+    }
+    case 'updateVisitNotes': {
+      const existing = state.countries[action.a3]
+      if (existing?.status !== 'visited' || !existing.visits) return state
+      const visits = existing.visits.map((v) =>
+        v.id === action.visitId ? { ...v, notes: action.notes } : v,
+      )
+      return { ...state, countries: { ...state.countries, [action.a3]: { ...existing, visits } } }
+    }
+    case 'removeVisit': {
+      const existing = state.countries[action.a3]
+      if (existing?.status !== 'visited' || !existing.visits) return state
+      const visits = existing.visits.filter((v) => v.id !== action.visitId)
+      const countries = { ...state.countries }
+      // Last visit removed → the country returns to unvisited (keeps visited ⟺ ≥1 visit).
+      if (visits.length === 0) delete countries[action.a3]
+      else countries[action.a3] = { ...existing, visits }
+      return { ...state, countries }
+    }
     case 'setWishlist':
       return {
         ...state,

@@ -151,3 +151,15 @@ confirm all fields show; tap an unseeded country and confirm the "no tips yet" p
   (Map / Passport / Challenges). With no persisted non-country state, `TravelData` stays
   **`version: 1`** (the brief `packing` v2 slice was removed). `migrate()` only steps *forward*, so
   any leftover v2 blob from the abandoned build keeps its `countries` instead of resetting.
+- 2026-06-30 — **Per-visit notes + multiple dated visits per country built and verified locally**
+  on `feat/visit-notes`. This is the **first real schema bump: `version: 2`.** A `CountryEntry`
+  now holds `visits: Visit[]` (each `{ id, year, notes? }`) instead of a single `visitedYear`, so a
+  country can have **several dated visits**, each with its own free-text notes. `storage.ts`
+  `migrateV1toV2` turns an old `visitedYear` into a one-element `visits` array (wishlist entries
+  untouched). The **Passport** now shows **one stamp per visit** (not per country), and tapping a
+  stamp — or a visit row in `CountryPanel` — opens `VisitNotes.tsx`, a centred-card pop-up (reusing
+  the `CountryTips` pattern) with an editable notes textarea and a **photos placeholder** (📷 "coming
+  soon" — no `photos` field persisted yet; that would be a future v3). New reducer actions
+  `addVisit` / `updateVisitNotes` / `removeVisit` (removing the last visit deletes the entry →
+  unvisited). Badges, challenges and progress stats still derive from `status` only, so they are
+  unchanged (a country with two visits still counts once).
