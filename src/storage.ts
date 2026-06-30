@@ -14,9 +14,9 @@ type AnyBlob = { version?: number } & Record<string, unknown>
 
 function step(blob: AnyBlob): AnyBlob {
   switch (blob.version) {
-    // Version 1 is the first shape, so there are no migration steps yet. When Phase 2
-    // changes the shape, bump CURRENT_VERSION and add `case 1:` here returning the v2 blob,
-    // so an old saved map upgrades one step at a time instead of being reset.
+    // Version 1 is the only shape, so there are no upgrade steps yet. When the shape changes,
+    // bump CURRENT_VERSION and add `case 1:` here returning the next blob, so an old saved map
+    // upgrades one step at a time instead of being reset.
     default:
       throw new Error(`Unsupported aroundtheworld data version: ${blob.version}`)
   }
@@ -26,10 +26,15 @@ function hasValidCountries(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === 'object' && !Array.isArray(value)
 }
 
-/** Bring a stored blob up to the current version, then coerce any malformed field to safe defaults. */
+/**
+ * Bring a stored blob up to the current version, then coerce any malformed field to safe defaults.
+ * Only steps *forward* (version < current): a blob from a newer/abandoned build (e.g. an earlier
+ * dev branch's v2 with a `packing` field) keeps its `countries` and is re-stamped rather than
+ * thrown away — so it never silently resets the user's map.
+ */
 function migrate(parsed: AnyBlob): TravelData {
   let blob = parsed
-  while (blob.version !== CURRENT_VERSION) {
+  while (typeof blob.version === 'number' && blob.version < CURRENT_VERSION) {
     blob = step(blob)
   }
   const countries = hasValidCountries(blob.countries) ? (blob.countries as TravelData['countries']) : {}

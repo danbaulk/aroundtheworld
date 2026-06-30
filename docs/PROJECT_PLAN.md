@@ -1,6 +1,6 @@
 # Around the World — Plan
 
-_Last updated: 2026-06-29 · Status: Phases 1–2 built (local prototype runs)_
+_Last updated: 2026-06-30 · Status: Phases 1–3 built (local prototype runs)_
 
 ## What this is
 Around the World is a local-first web app for tracking your worldwide travel progress. The
@@ -69,22 +69,22 @@ the timeline in date order, badges unlock at thresholds, challenge progress fill
 only ever lands on unvisited countries.
 
 ### Phase 3 — Travel tips / assistant
-**Goal:** Tapping a country opens a useful, practical info panel, and there are general
-trip-prep tools to help you get to the airport prepared.
+**Goal:** Tapping a country, then a **Travel tips** button, opens a pop-up of useful, practical
+per-country info.
 **Includes:**
-- Tap a country → **info panel** populated from **static curated JSON** for ~5–10 seed
-  countries. Fields per country: currency; airport→city transfer & public transport; common
-  phrases / quick words; SIM situation; gov.uk travel advice (summary/link); common
-  scams/gotchas; vaccines; entry requirements; free ATMs; tourist-friendly
-  supermarkets/pharmacists; water situation; toilet situation.
-- Graceful "no tips yet" state for countries not in the seed set.
-- **General trip-prep tools** (not per-country): a **packing checklist** and an **airport
-  timeline / countdown** with useful pre-flight info.
+- Tap a country → its panel shows a **💡 Travel tips** button (alongside Visited/Wishlist/Clear).
+- The button opens a **pop-up** populated from **static curated JSON** for ~5–10 seed countries.
+  Fields per country: currency; airport→city transfer & public transport; common phrases / quick
+  words; SIM situation; gov.uk travel advice (summary/link); common scams/gotchas; vaccines; entry
+  requirements; free ATMs; tourist-friendly supermarkets/pharmacists; water situation; toilet
+  situation.
+- Graceful "no tips yet" state, shown in the pop-up for countries not in the seed set.
 **Explicitly not yet:** live/AI-generated tips, external API integrations, full coverage of all
 countries (start with a curated seed set).
-**How we'll run & test it locally:** `npm run dev`; tap a seeded country and confirm its panel
-shows all fields; tap an unseeded country and confirm the empty state; open the packing
-checklist and airport-timeline tools.
+**Dropped (decided 2026-06-30):** the general trip-prep tools — packing checklist and airport
+timeline/countdown — and the dedicated Tips tab. Not useful enough to keep.
+**How we'll run & test it locally:** `npm run dev`; tap a seeded country, open the tips pop-up and
+confirm all fields show; tap an unseeded country and confirm the "no tips yet" pop-up state.
 
 ## Deferred to productionise
 - **Travel partners** — adding partners and showing where you've travelled together (needs
@@ -100,8 +100,8 @@ checklist and airport-timeline tools.
 - Usage-based airline discounts (more you use the app, the better the discounts).
 
 ## Open questions
-- Which ~5–10 countries to seed travel tips for first (Phase 3) — pick at build time
-  (suggest high-traffic destinations).
+- _(resolved 2026-06-30)_ Phase 3 travel-tips seed set chosen: Japan, France, Thailand, USA,
+  Spain, Italy, Australia, UAE, Mexico, Morocco (the "Recommended 10").
 
 ## Decisions log
 - 2026-06-28 — Local-first web app (React + Vite + TS, `localStorage`), matching pantry/gymbuddy.
@@ -137,3 +137,17 @@ checklist and airport-timeline tools.
 - 2026-06-29 — Layout: **dart lives on the Map** (picks an unvisited country, reuses `CountryPanel`
   to wishlist it); **badges + challenges on the Challenges tab**; **Passport** is purely the dated
   stamp timeline, grouped by year (chronological).
+- 2026-06-30 — **Phase 3 (Travel tips / assistant) built and verified locally** on
+  `feat/travel-tips` (cut from `main` after PR #1 merged gamification).
+- 2026-06-30 — Per-country tips are **static curated JSON** in `src/data/tips.ts`, keyed by `a3`
+  (`getTips()`), for the Recommended 10; written from a **UK traveller's perspective** (gov.uk
+  advice, British spelling).
+- 2026-06-30 — Tips are surfaced via a **💡 Travel tips button** in `CountryPanel` that opens a
+  **centred-card pop-up** (`src/components/CountryTips.tsx`) over a dimmed map; the button shows on
+  **every** country and the pop-up shows a "no tips yet" state for unseeded ones. (Superseded the
+  first cut, which rendered the tips inline in the panel.)
+- 2026-06-30 — **Reversed the same day:** the packing checklist, airport timeline, and the
+  dedicated **Tips tab** were dropped as not useful enough. The bottom nav is back to **3 tabs**
+  (Map / Passport / Challenges). With no persisted non-country state, `TravelData` stays
+  **`version: 1`** (the brief `packing` v2 slice was removed). `migrate()` only steps *forward*, so
+  any leftover v2 blob from the abandoned build keeps its `countries` instead of resetting.
