@@ -3,15 +3,13 @@ import { TravelProvider } from './store'
 import MapTab from './components/MapTab'
 import PassportTab from './components/PassportTab'
 import ChallengesTab from './components/ChallengesTab'
-import ComingSoon from './components/ComingSoon'
 
-type Tab = 'map' | 'passport' | 'challenges' | 'tips'
+type Tab = 'map' | 'passport' | 'challenges'
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: 'map', label: 'Map', icon: '🗺️' },
   { id: 'passport', label: 'Passport', icon: '📖' },
   { id: 'challenges', label: 'Challenges', icon: '🏅' },
-  { id: 'tips', label: 'Tips', icon: '💡' },
 ]
 
 export default function App() {
@@ -29,14 +27,12 @@ export default function App() {
             <MapTab />
           ) : tab === 'passport' ? (
             <PassportTab />
-          ) : tab === 'challenges' ? (
-            <ChallengesTab />
           ) : (
-            <ComingSoon label="Travel Tips" />
+            <ChallengesTab />
           )}
         </main>
 
-        <nav className="grid grid-cols-4 border-t border-slate-200 bg-white">
+        <nav className="grid grid-cols-3 border-t border-slate-200 bg-white">
           {TABS.map((t) => (
             <button
               key={t.id}

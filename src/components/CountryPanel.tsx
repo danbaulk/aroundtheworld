@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useTravel } from '../travelContext'
 import { statusOf } from '../reducer'
 import { getCountry } from '../data/countries'
+import CountryTips from './CountryTips'
 
 const CURRENT_YEAR = new Date().getFullYear()
 const YEARS = Array.from({ length: CURRENT_YEAR - 1950 + 1 }, (_, i) => CURRENT_YEAR - i)
@@ -18,6 +19,7 @@ export default function CountryPanel({ a3, onClose }: Props) {
   const country = getCountry(a3)
   const status = statusOf(state, a3)
   const [year, setYear] = useState<number>(state.countries[a3]?.visitedYear ?? CURRENT_YEAR)
+  const [showTips, setShowTips] = useState(false)
 
   const btn = 'rounded-lg px-3 py-2 text-sm font-semibold transition'
   const active = 'text-white'
@@ -80,6 +82,15 @@ export default function CountryPanel({ a3, onClose }: Props) {
           </select>
         </label>
       </div>
+
+      <button
+        onClick={() => setShowTips(true)}
+        className="mt-3 w-full rounded-lg bg-sky-50 px-3 py-2 text-sm font-semibold text-sky-700 transition hover:bg-sky-100"
+      >
+        💡 Travel tips
+      </button>
+
+      {showTips && <CountryTips a3={a3} onClose={() => setShowTips(false)} />}
     </div>
   )
 }
