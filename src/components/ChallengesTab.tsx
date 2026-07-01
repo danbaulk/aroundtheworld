@@ -1,23 +1,27 @@
+import { useState } from 'react'
 import { useTravel } from '../travelContext'
 import { BADGES, earnedBadges } from '../data/badges'
 import { CHALLENGES, isComplete } from '../data/challenges'
+import { earnedBadgeStamps, type EarnedBadge } from '../badgeStamps'
+import BadgeDetail from './BadgeDetail'
 import type { TravelData } from '../types'
 
-function BadgeGrid({ state }: { state: TravelData }) {
+type BadgeGridProps = { state: TravelData; onGoToStamp: (a3: string, visitId: string) => void }
+
+function BadgeGrid({ state, onGoToStamp }: BadgeGridProps) {
   const earned = new Set(earnedBadges(state).map((b) => b.id))
+  const detailById = new Map(earnedBadgeStamps(state).map((e) => [e.badge.id, e]))
+  const [selected, setSelected] = useState<EarnedBadge | null>(null)
+
   return (
     <section>
       <h2 className="mb-2 text-sm font-bold text-slate-700">Badges</h2>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
         {BADGES.map((b) => {
           const got = earned.has(b.id)
-          return (
-            <div
-              key={b.id}
-              className={`flex flex-col items-center gap-1 rounded-xl px-3 py-3 text-center ring-1 transition ${
-                got ? 'bg-white ring-green-500' : 'bg-slate-50 opacity-60 ring-slate-200'
-              }`}
-            >
+          const detail = detailById.get(b.id)
+          const tile = (
+            <>
               <span className="text-3xl" aria-hidden>
                 {b.icon}
               </span>
@@ -25,10 +29,37 @@ function BadgeGrid({ state }: { state: TravelData }) {
                 {b.label}
               </span>
               <span className="text-xs text-slate-500">{b.description}</span>
+            </>
+          )
+          const base = 'flex flex-col items-center gap-1 rounded-xl px-3 py-3 text-center ring-1 transition'
+          return detail ? (
+            <button
+              key={b.id}
+              onClick={() => setSelected(detail)}
+              className={`${base} bg-white ring-green-500 hover:ring-green-600 hover:shadow-sm`}
+            >
+              {tile}
+            </button>
+          ) : (
+            <div
+              key={b.id}
+              className={`${base} ${got ? 'bg-white ring-green-500' : 'bg-slate-50 opacity-60 ring-slate-200'}`}
+            >
+              {tile}
             </div>
           )
         })}
       </div>
+
+      {selected && (
+        <BadgeDetail
+          badge={selected.badge}
+          contributing={selected.contributing}
+          earning={selected.earning}
+          onGoToStamp={onGoToStamp}
+          onClose={() => setSelected(null)}
+        />
+      )}
     </section>
   )
 }
@@ -68,13 +99,15 @@ function ChallengeList({ state }: { state: TravelData }) {
   )
 }
 
+type Props = { onGoToStamp: (a3: string, visitId: string) => void }
+
 // Gamification tab: derived milestone badges + curated challenges with auto-progress.
-export default function ChallengesTab() {
+export default function ChallengesTab({ onGoToStamp }: Props) {
   const { state } = useTravel()
   return (
     <div className="h-full overflow-y-auto p-3">
       <div className="flex flex-col gap-5">
-        <BadgeGrid state={state} />
+        <BadgeGrid state={state} onGoToStamp={onGoToStamp} />
         <ChallengeList state={state} />
       </div>
     </div>

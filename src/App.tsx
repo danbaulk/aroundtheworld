@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { TravelProvider } from './store'
 import MapTab from './components/MapTab'
 import PassportTab from './components/PassportTab'
@@ -14,6 +14,14 @@ const TABS: { id: Tab; label: string; icon: string }[] = [
 
 export default function App() {
   const [tab, setTab] = useState<Tab>('map')
+  const [focus, setFocus] = useState<{ a3: string; visitId: string } | null>(null)
+
+  // Clicking a badge on the Challenges tab jumps to the stamp that earned it on the Passport tab.
+  const goToStamp = useCallback((a3: string, visitId: string) => {
+    setFocus({ a3, visitId })
+    setTab('passport')
+  }, [])
+  const clearFocus = useCallback(() => setFocus(null), [])
 
   return (
     <TravelProvider>
@@ -26,9 +34,9 @@ export default function App() {
           {tab === 'map' ? (
             <MapTab />
           ) : tab === 'passport' ? (
-            <PassportTab />
+            <PassportTab focus={focus} onFocusHandled={clearFocus} />
           ) : (
-            <ChallengesTab />
+            <ChallengesTab onGoToStamp={goToStamp} />
           )}
         </main>
 

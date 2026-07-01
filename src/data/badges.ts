@@ -12,7 +12,7 @@ export type Badge = {
 }
 
 /** A continent is "complete" when every UN-member country in it is visited (Antarctica has none, so it's excluded). */
-function continentComplete(state: TravelData, continent: (typeof CONTINENTS)[number]): boolean {
+export function continentComplete(state: TravelData, continent: (typeof CONTINENTS)[number]): boolean {
   const members = COUNTRIES.filter((c) => c.counts && c.continent === continent)
   return members.length > 0 && members.every((c) => statusOf(state, c.a3) === 'visited')
 }
