@@ -1,6 +1,9 @@
 import { useState } from 'react'
 import { useTravel } from '../travelContext'
 import { getCountry } from '../data/countries'
+import { formatVisitDate } from '../selectors'
+import ConfirmDialog from './ConfirmDialog'
+import PhotosPlaceholder from './PhotosPlaceholder'
 
 type Props = {
   a3: string
@@ -18,6 +21,7 @@ export default function VisitNotes({ a3, visitId, onClose }: Props) {
   const visit = entry?.status === 'visited' ? entry.visits?.find((v) => v.id === visitId) : undefined
 
   const [notes, setNotes] = useState(visit?.notes ?? '')
+  const [confirmRemove, setConfirmRemove] = useState(false)
 
   const persist = () => {
     if (visit && notes !== (visit.notes ?? '')) {
@@ -50,7 +54,7 @@ export default function VisitNotes({ a3, visitId, onClose }: Props) {
           <h2 className="flex items-center gap-2 text-lg font-bold text-slate-800">
             <span aria-hidden>{country?.flag}</span>
             {country?.name ?? a3}
-            {visit && <span className="font-medium text-slate-400">· {visit.year}</span>}
+            {visit && <span className="font-medium text-slate-400">· {formatVisitDate(visit)}</span>}
           </h2>
           <button
             onClick={close}
@@ -75,18 +79,10 @@ export default function VisitNotes({ a3, visitId, onClose }: Props) {
               />
             </div>
 
-            <div>
-              <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">Photos</p>
-              <div className="flex flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-3 py-6 text-center text-sm text-slate-400">
-                <span className="text-2xl" aria-hidden>
-                  📷
-                </span>
-                Photo uploads coming soon
-              </div>
-            </div>
+            <PhotosPlaceholder />
 
             <button
-              onClick={remove}
+              onClick={() => setConfirmRemove(true)}
               className="self-start text-sm font-medium text-rose-500 hover:text-rose-700 hover:underline"
             >
               Remove visit
@@ -96,6 +92,15 @@ export default function VisitNotes({ a3, visitId, onClose }: Props) {
           <div className="p-8 text-center text-sm text-slate-500">This visit no longer exists.</div>
         )}
       </div>
+
+      {confirmRemove && (
+        <ConfirmDialog
+          message="Remove this visit? This can't be undone."
+          confirmLabel="Remove"
+          onConfirm={remove}
+          onCancel={() => setConfirmRemove(false)}
+        />
+      )}
     </div>
   )
 }

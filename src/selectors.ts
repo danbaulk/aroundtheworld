@@ -3,8 +3,31 @@ import type { TravelData, Visit } from './types'
 import { statusOf } from './reducer'
 import { COUNTRIES, getCountry } from './data/countries'
 
-export type PassportStamp = { a3: string; visitId: string; year: number; name: string; flag: string }
+export type PassportStamp = { a3: string; visitId: string; year: number; month?: number; name: string; flag: string }
 export type PassportYear = { year: number; stamps: PassportStamp[] }
+
+/** Short month names, indexed 1–12 (index 0 unused) — shared by the picker and the formatter. */
+export const MONTHS = [
+  '',
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+] as const
+
+/** A visit's date for display: "Mar 2024" when the month is known, else just "2024". */
+export function formatVisitDate(visit: Pick<Visit, 'year' | 'month'>): string {
+  const name = visit.month && visit.month >= 1 && visit.month <= 12 ? MONTHS[visit.month] : ''
+  return name ? `${name} ${visit.year}` : `${visit.year}`
+}
 
 /** One stamp per visit, grouped by visit year — years chronological (ascending), names A–Z within a year. */
 export function passportByYear(state: TravelData): PassportYear[] {
@@ -17,6 +40,7 @@ export function passportByYear(state: TravelData): PassportYear[] {
         a3,
         visitId: visit.id,
         year: visit.year,
+        month: visit.month,
         name: country?.name ?? a3,
         flag: country?.flag ?? '🏳️',
       }
@@ -39,7 +63,7 @@ export function visitsForCountry(state: TravelData, a3: string): Visit[] {
 
 /**
  * A random unvisited country's alpha-3, for the dart throw. Prefers a *truly new* UN-member
- * country (neither visited nor wishlisted); falls back to any non-visited member; `undefined`
+ * country (neither visited nor bucket-listed); falls back to any non-visited member; `undefined`
  * once every country is visited.
  */
 export function pickRandomUnvisited(state: TravelData): string | undefined {

@@ -22,6 +22,7 @@ export const BADGES: Badge[] = [
   { id: 'explorer', icon: '🌍', label: 'Explorer', description: 'Visit 10 countries.', earned: (s) => computeStats(s).visitedCount >= 10 },
   { id: 'globetrotter', icon: '✈️', label: 'Globetrotter', description: 'Visit 25 countries.', earned: (s) => computeStats(s).visitedCount >= 25 },
   { id: 'jet-setter', icon: '🏆', label: 'Jet-setter', description: 'Visit 50 countries.', earned: (s) => computeStats(s).visitedCount >= 50 },
+  { id: 'bucket-list', icon: '🪣', label: 'Bucket list', description: 'Visit a country from your bucket list.', earned: (s) => Object.values(s.countries).some((e) => e.status === 'visited' && e.fromBucketList) },
   { id: 'continent-complete', icon: '🧭', label: 'Continent complete', description: 'Visit every country in a single continent.', earned: (s) => CONTINENTS.some((c) => continentComplete(s, c)) },
   { id: 'seven-continents', icon: '🌐', label: 'Seven continents', description: 'Set foot on all 7 continents.', earned: (s) => computeStats(s).continentsCovered === 7 },
 ]

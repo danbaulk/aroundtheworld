@@ -19,7 +19,7 @@ export default function ProgressStats() {
       <Stat value={`${stats.visitedCount}`} label={`of ${TOTAL_COUNTRIES} countries`} />
       <Stat value={`${stats.percentOfWorld}%`} label="of the world" />
       <Stat value={`${stats.continentsCovered}/${CONTINENTS.length}`} label="continents" />
-      <Stat value={`${stats.wishlistCount}`} label="on wishlist" />
+      <Stat value={`${stats.bucketListCount}`} label="on bucket list" />
     </div>
   )
 }

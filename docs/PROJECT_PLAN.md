@@ -14,7 +14,7 @@ locally. Travel partners, deal alerts, leaderboards and other social/monetisatio
 intentionally out of scope for now.
 
 ## Feature groups
-- **Map & progress** — world country map; tap to toggle visited; wishlist state; record visit
+- **Map & progress** — world country map; tap to toggle visited; bucket-list state; record visit
   date; versioned local persistence; progress stats (country count, % of world, continents).
 - **Gamification** — dated passport book on a timeline; milestone badges; predefined
   auto-progress challenges; random dart throw at an unvisited country.
@@ -31,12 +31,12 @@ intentionally out of scope for now.
 
 ### Phase 1 — The Scratch Map (simplest runnable slice)
 **Goal:** Open the app, see a world map, tap countries to mark them visited (with the date) or
-add them to a wishlist, and watch your progress stats update — all saved locally so it persists
+add them to a bucket list, and watch your progress stats update — all saved locally so it persists
 across reloads.
 **Includes:**
 - World map rendered countries-only (use an existing SVG/geo dataset so the map is real
   without bespoke cartography).
-- Tap a country to cycle/set its state: **unvisited → visited** (and a way to set **wishlist**).
+- Tap a country to cycle/set its state: **unvisited → visited** (and a way to set **bucket list**).
 - When marking visited, capture **when** (default to "now"/this year, editable).
 - Versioned `localStorage` persistence in an isolated storage module (mirror pantry/gymbuddy:
   one typed state object, schema `version`, step migrations, re-seed fallback).
@@ -72,7 +72,8 @@ only ever lands on unvisited countries.
 **Goal:** Tapping a country, then a **Travel tips** button, opens a pop-up of useful, practical
 per-country info.
 **Includes:**
-- Tap a country → its panel shows a **💡 Travel tips** button (alongside Visited/Wishlist/Clear).
+- Tap a country → its panel shows a **💡 Travel tips** button (alongside the Add-visit and
+  bucket-list controls).
 - The button opens a **pop-up** populated from **static curated JSON** for ~5–10 seed countries.
   Fields per country: currency; airport→city transfer & public transport; common phrases / quick
   words; SIM situation; gov.uk travel advice (summary/link); common scams/gotchas; vaccines; entry
@@ -163,3 +164,15 @@ confirm all fields show; tap an unseeded country and confirm the "no tips yet" p
   `addVisit` / `updateVisitNotes` / `removeVisit` (removing the last visit deletes the entry →
   unvisited). Badges, challenges and progress stats still derive from `status` only, so they are
   unchanged (a country with two visits still counts once).
+- 2026-06-30 — **Country-panel rework + "wishlist" renamed to "bucket list" (schema `version: 3`).**
+  The panel's three-button row (Visited / Wishlist / Clear) is gone. **Clear is dropped** (remove
+  a country by removing its visits or toggling the bucket list off). **Visited → a "+ Add visit"
+  button** opening `AddVisit.tsx`, a centred-card form to pick **month + year**, add notes and a
+  photos placeholder. The **Wishlist button → a 🪣 bucket-list toggle in the panel's top-right**;
+  visiting a bucket-listed country auto-removes it from the list and the bucket becomes a green
+  **✓**. Removing a visit now goes through a reusable `ConfirmDialog.tsx` ("are you sure?").
+  Schema v3: `status` literal `'wishlist'` → `'bucketlist'` (migrated by `migrateV2toV3`); `Visit`
+  gains optional `month`; `CountryEntry` gains `fromBucketList` (set when a visit is logged for a
+  bucket-listed country) powering a new **"Bucket list" badge**. Actions: `setWishlist` /
+  `clearCountry` removed, `toggleBucketList` added. Month is shown wherever a visit date appears
+  (`formatVisitDate` in `selectors.ts`); Passport still groups by year.
