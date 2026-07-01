@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTravel } from '../travelContext'
-import { passportByYear } from '../selectors'
+import { MONTHS, passportByYear } from '../selectors'
 import VisitNotes from './VisitNotes'
 
 // The passport book: one dated stamp per visit, laid out on a chronological timeline.
@@ -39,7 +39,12 @@ export default function PassportTab() {
                   <span className="text-2xl" aria-hidden>
                     {s.flag}
                   </span>
-                  <span className="text-sm font-medium text-slate-700">{s.name}</span>
+                  <span className="text-sm font-medium text-slate-700">
+                    {s.name}
+                    {s.month && MONTHS[s.month] && (
+                      <span className="font-normal text-slate-400"> ({MONTHS[s.month]})</span>
+                    )}
+                  </span>
                 </button>
               ))}
             </div>

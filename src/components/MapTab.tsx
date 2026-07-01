@@ -53,7 +53,7 @@ export default function MapTab() {
           <span className="font-semibold">
             {suggestion.flag} {suggestion.name}
           </span>{' '}
-          — add it to your wishlist below, or{' '}
+          — add it to your bucket list below, or{' '}
           <button onClick={throwDart} className="font-semibold underline">
             throw again
           </button>

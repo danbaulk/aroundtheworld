@@ -1,5 +1,5 @@
 // Pure, framework-free state logic — no React imports (mirrors gymbuddy/src/reducer.ts).
-import type { Action, CountryStatus, TravelData } from './types'
+import type { Action, CountryEntry, CountryStatus, TravelData } from './types'
 import { byA3, CONTINENTS, TOTAL_COUNTRIES } from './data/countries'
 import type { Continent } from './data/countries'
 
@@ -8,13 +8,13 @@ export function travelReducer(state: TravelData, action: Action): TravelData {
     case 'addVisit': {
       const existing = state.countries[action.a3]
       const prevVisits = existing?.status === 'visited' ? existing.visits ?? [] : []
-      return {
-        ...state,
-        countries: {
-          ...state.countries,
-          [action.a3]: { status: 'visited', visits: [...prevVisits, action.visit] },
-        },
-      }
+      // Remember a bucket-list origin so the "Bucket list" badge can fire; visiting otherwise
+      // overwrites the status, losing the fact it was ever on the list. Carry it across visits.
+      const fromBucketList =
+        existing?.status === 'visited' ? existing.fromBucketList : existing?.status === 'bucketlist'
+      const entry: CountryEntry = { status: 'visited', visits: [...prevVisits, action.visit] }
+      if (fromBucketList) entry.fromBucketList = true
+      return { ...state, countries: { ...state.countries, [action.a3]: entry } }
     }
     case 'updateVisitNotes': {
       const existing = state.countries[action.a3]
@@ -34,15 +34,13 @@ export function travelReducer(state: TravelData, action: Action): TravelData {
       else countries[action.a3] = { ...existing, visits }
       return { ...state, countries }
     }
-    case 'setWishlist':
-      return {
-        ...state,
-        countries: { ...state.countries, [action.a3]: { status: 'wishlist' } },
-      }
-    case 'clearCountry': {
-      if (!(action.a3 in state.countries)) return state
+    case 'toggleBucketList': {
+      const existing = state.countries[action.a3]
+      // Visited countries show a tick, not the toggle — guard so a stray dispatch can't wipe them.
+      if (existing?.status === 'visited') return state
       const countries = { ...state.countries }
-      delete countries[action.a3]
+      if (existing?.status === 'bucketlist') delete countries[action.a3] // toggle off
+      else countries[action.a3] = { status: 'bucketlist' } // toggle on
       return { ...state, countries }
     }
     default:
@@ -56,25 +54,25 @@ export function statusOf(state: TravelData, a3: string): CountryStatus | undefin
 
 export type Stats = {
   visitedCount: number
-  wishlistCount: number
+  bucketListCount: number
   percentOfWorld: number // 0–100, capped
   continentsCovered: number // out of CONTINENTS.length (7)
 }
 
-/** Derive the progress headline numbers from the visited/wishlist map. */
+/** Derive the progress headline numbers from the visited/bucket-list map. */
 export function computeStats(state: TravelData): Stats {
   let visitedCount = 0
-  let wishlistCount = 0
+  let bucketListCount = 0
   const continents = new Set<Continent>()
   for (const [a3, entry] of Object.entries(state.countries)) {
     if (entry.status === 'visited') {
       visitedCount++
       const continent = byA3.get(a3)?.continent
       if (continent && CONTINENTS.includes(continent)) continents.add(continent)
-    } else if (entry.status === 'wishlist') {
-      wishlistCount++
+    } else if (entry.status === 'bucketlist') {
+      bucketListCount++
     }
   }
   const percentOfWorld = Math.min(100, Math.round((visitedCount / TOTAL_COUNTRIES) * 100))
-  return { visitedCount, wishlistCount, percentOfWorld, continentsCovered: continents.size }
+  return { visitedCount, bucketListCount, percentOfWorld, continentsCovered: continents.size }
 }

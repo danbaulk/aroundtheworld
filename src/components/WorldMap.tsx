@@ -9,7 +9,7 @@ import { lookupGeo } from '../data/countries'
 const FILL = {
   unvisited: '#e2e8f0', // slate-200
   visited: '#16a34a', // green-600
-  wishlist: '#f59e0b', // amber-500
+  bucketlist: '#f59e0b', // amber-500
 } as const
 
 type Props = {

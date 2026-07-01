@@ -3,7 +3,7 @@
 import type { TravelData } from './types'
 
 const STORAGE_KEY = 'aroundtheworld:data'
-const CURRENT_VERSION = 2 as const
+const CURRENT_VERSION = 3 as const
 
 /** A scratch map starts blank — there is no demo seed (you scratch off your own countries). */
 export function defaultState(): TravelData {
@@ -19,6 +19,11 @@ function step(blob: AnyBlob): AnyBlob {
     // are untouched. The malformed-field coercion below keeps this defensive.
     case 1:
       return migrateV1toV2(blob)
+    // v2 → v3: "wishlist" was renamed "bucket list"; the `status` literal follows. Visits also
+    // gained an optional `month`, and entries an optional `fromBucketList` flag — both absent in
+    // old data, so visited entries pass through unchanged.
+    case 2:
+      return migrateV2toV3(blob)
     default:
       throw new Error(`Unsupported aroundtheworld data version: ${blob.version}`)
   }
@@ -38,6 +43,18 @@ function migrateV1toV2(blob: AnyBlob): AnyBlob {
     }
   }
   return { version: 2, countries: next }
+}
+
+/** v2 status `'wishlist'` becomes `'bucketlist'`; everything else is preserved verbatim. */
+function migrateV2toV3(blob: AnyBlob): AnyBlob {
+  const countries = hasValidCountries(blob.countries) ? blob.countries : {}
+  const next: Record<string, unknown> = {}
+  for (const [a3, raw] of Object.entries(countries)) {
+    const entry = raw as { status?: unknown }
+    if (entry?.status === 'wishlist') next[a3] = { ...(raw as object), status: 'bucketlist' }
+    else next[a3] = raw
+  }
+  return { version: 3, countries: next }
 }
 
 function hasValidCountries(value: unknown): value is Record<string, unknown> {
