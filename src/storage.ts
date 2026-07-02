@@ -6,7 +6,7 @@ const STORAGE_KEY = 'aroundtheworld:data'
 const CURRENT_VERSION = 3 as const
 
 /** A scratch map starts blank — there is no demo seed (you scratch off your own countries). */
-export function defaultState(): TravelData {
+function defaultState(): TravelData {
   return { version: CURRENT_VERSION, countries: {} }
 }
 

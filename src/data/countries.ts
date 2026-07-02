@@ -19,7 +19,7 @@ export const CONTINENTS: readonly Continent[] = [
 export const byA3: ReadonlyMap<string, Country> = new Map(COUNTRIES.map((c) => [c.a3, c]))
 
 /** Lookup by ISO numeric id (matches the ids on world-atlas TopoJSON features). */
-export const byNumericId: ReadonlyMap<string, Country> = new Map(
+const byNumericId: ReadonlyMap<string, Country> = new Map(
   COUNTRIES.filter((c) => c.numericId !== '').map((c) => [c.numericId, c]),
 )
 
