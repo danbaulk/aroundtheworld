@@ -2,7 +2,7 @@
 // For every earned badge we produce its *contributing* stamps in chronological order; the LAST one
 // is the "earning" stamp — the visit whose addition first made the badge true. See docs table.
 import type { TravelData, Visit } from './types'
-import type { PassportStamp } from './selectors'
+import { byMonthThenName, type PassportStamp } from './selectors'
 import { BADGES, continentComplete, type Badge } from './data/badges'
 import { COUNTRIES, CONTINENTS, byA3, getCountry } from './data/countries'
 
@@ -25,12 +25,7 @@ function stampFor(a3: string, visit: Visit): PassportStamp {
 
 /** Chronological: year, then month (unknown sorts first), then name, then visitId (stable). */
 function byChrono(a: PassportStamp, b: PassportStamp): number {
-  return (
-    a.year - b.year ||
-    (a.month ?? 0) - (b.month ?? 0) ||
-    a.name.localeCompare(b.name) ||
-    a.visitId.localeCompare(b.visitId)
-  )
+  return a.year - b.year || byMonthThenName(a, b) || a.visitId.localeCompare(b.visitId)
 }
 
 /** One stamp per visited country — its earliest visit ("acquisition") — sorted chronologically. */

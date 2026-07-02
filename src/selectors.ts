@@ -29,7 +29,18 @@ export function formatVisitDate(visit: Pick<Visit, 'year' | 'month'>): string {
   return name ? `${name} ${visit.year}` : `${visit.year}`
 }
 
-/** One stamp per visit, grouped by visit year — years chronological (ascending), names A–Z within a year. */
+/** Chronological within a year: month ascending (unknown months first), then name A–Z. */
+export function byMonthThenName(
+  a: Pick<PassportStamp, 'month' | 'name'>,
+  b: Pick<PassportStamp, 'month' | 'name'>,
+): number {
+  return (a.month ?? 0) - (b.month ?? 0) || a.name.localeCompare(b.name)
+}
+
+/**
+ * One stamp per visit, grouped by visit year — years chronological (ascending); within a year,
+ * chronological by month (month-less visits first), names A–Z as the tie-break.
+ */
 export function passportByYear(state: TravelData): PassportYear[] {
   const byYear = new Map<number, PassportStamp[]>()
   for (const [a3, entry] of Object.entries(state.countries)) {
@@ -51,7 +62,7 @@ export function passportByYear(state: TravelData): PassportYear[] {
   }
   return [...byYear.entries()]
     .sort(([a], [b]) => a - b)
-    .map(([year, stamps]) => ({ year, stamps: stamps.sort((x, y) => x.name.localeCompare(y.name)) }))
+    .map(([year, stamps]) => ({ year, stamps: stamps.sort(byMonthThenName) }))
 }
 
 /** A visited country's visits, most-recent year first, for the country panel list. */

@@ -9,9 +9,10 @@ type Props = {
   onFocusHandled?: () => void
 }
 
-// The passport book: one dated stamp per visit, laid out on a chronological timeline.
-// Tap a stamp to open its notes & photos. A stamp that *earned* a badge shows the badge icon(s),
-// and can be scrolled-to & briefly highlighted when arrived at from the Challenges tab.
+// The passport book: one dated stamp per visit, hung off a vertical timeline — a continuous
+// rail down the left with year markers as nodes and a dot per stamp. Tap a stamp to open its
+// notes & photos. A stamp that *earned* a badge shows the badge icon(s), and can be scrolled-to
+// & briefly highlighted when arrived at from the Challenges tab.
 export default function PassportTab({ focus = null, onFocusHandled }: Props) {
   const { state } = useTravel()
   const years = passportByYear(state)
@@ -53,11 +54,18 @@ export default function PassportTab({ focus = null, onFocusHandled }: Props) {
       <p className="mb-3 text-sm text-slate-500">
         {stampCount} {stampCount === 1 ? 'stamp' : 'stamps'} in your passport
       </p>
-      <div className="flex flex-col gap-5">
+      <div className="relative flex flex-col gap-5 pl-6">
+        <div className="absolute inset-y-1 left-2 w-px bg-slate-300" aria-hidden />
         {years.map(({ year, stamps }) => (
           <section key={year}>
-            <h2 className="mb-2 text-sm font-bold text-slate-700">{year}</h2>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            <h2 className="relative mb-2 text-sm font-bold text-slate-700">
+              <span
+                className="absolute top-1/2 -left-[22px] h-3.5 w-3.5 -translate-y-1/2 rounded-full border-2 border-white bg-slate-400"
+                aria-hidden
+              />
+              {year}
+            </h2>
+            <div className="flex flex-col gap-2">
               {stamps.map((s) => {
                 const sKey = stampKey(s.a3, s.visitId)
                 const earnedHere = bStamps.get(sKey)
@@ -68,10 +76,14 @@ export default function PassportTab({ focus = null, onFocusHandled }: Props) {
                     key={s.visitId}
                     ref={isFocus ? focusRef : undefined}
                     onClick={() => setOpen({ a3: s.a3, visitId: s.visitId })}
-                    className={`flex items-center gap-2 rounded-xl bg-white px-3 py-2 text-left shadow-sm ring-1 transition ${
+                    className={`relative flex items-center gap-2 rounded-xl bg-white px-3 py-2 text-left shadow-sm ring-1 transition ${
                       isHi ? 'ring-2 ring-amber-400' : 'ring-slate-200 hover:ring-sky-300'
                     }`}
                   >
+                    <span
+                      className="absolute top-1/2 -left-[19px] h-2 w-2 -translate-y-1/2 rounded-full bg-slate-300"
+                      aria-hidden
+                    />
                     <span className="text-2xl" aria-hidden>
                       {s.flag}
                     </span>
