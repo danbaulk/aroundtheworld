@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useTravel } from '../travelContext'
+import { computeStats } from '../reducer'
 import { BADGES, earnedBadges } from '../data/badges'
 import { CHALLENGES, isComplete } from '../data/challenges'
 import { earnedBadgeStamps, type EarnedBadge } from '../badgeStamps'
@@ -65,12 +66,13 @@ function BadgeGrid({ state, onGoToStamp }: BadgeGridProps) {
 }
 
 function ChallengeList({ state }: { state: TravelData }) {
+  const stats = computeStats(state)
   return (
     <section>
       <h2 className="mb-2 text-sm font-bold text-slate-700">Challenges</h2>
       <div className="flex flex-col gap-2">
         {CHALLENGES.map((c) => {
-          const p = c.progress(state)
+          const p = c.progress(state, stats)
           const done = isComplete(p)
           const pct = Math.min(100, Math.round((p.current / p.target) * 100))
           return (

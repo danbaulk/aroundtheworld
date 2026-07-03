@@ -2,6 +2,7 @@
 // For every earned badge we produce its *contributing* stamps in chronological order; the LAST one
 // is the "earning" stamp — the visit whose addition first made the badge true. See docs table.
 import type { TravelData } from './types'
+import { computeStats } from './reducer'
 import { byMonthThenName, stampFor, type PassportStamp } from './selectors'
 import { BADGES, continentComplete, type Badge } from './data/badges'
 import { COUNTRIES, CONTINENTS, byA3 } from './data/countries'
@@ -30,14 +31,13 @@ function acquisitionStamps(state: TravelData): PassportStamp[] {
 }
 
 /** The first `n` acquisition stamps (the run that reached a count milestone), or [] if not reached. */
-function firstN(state: TravelData, n: number): PassportStamp[] {
-  const acq = acquisitionStamps(state)
+function firstN(acq: PassportStamp[], n: number): PassportStamp[] {
   return acq.length >= n ? acq.slice(0, n) : []
 }
 
 /** Every member's acquisition stamp for the continent that was completed earliest, or []. */
-function continentCompleteStamps(state: TravelData): PassportStamp[] {
-  const acqByA3 = new Map(acquisitionStamps(state).map((s) => [s.a3, s]))
+function continentCompleteStamps(state: TravelData, acq: PassportStamp[]): PassportStamp[] {
+  const acqByA3 = new Map(acq.map((s) => [s.a3, s]))
   let best: PassportStamp[] | null = null
   for (const continent of CONTINENTS) {
     if (!continentComplete(state, continent)) continue
@@ -54,8 +54,8 @@ function continentCompleteStamps(state: TravelData): PassportStamp[] {
 }
 
 /** One "coverage" stamp per continent (earliest visit there), or [] unless all 7 are covered. */
-function sevenContinentStamps(state: TravelData): PassportStamp[] {
-  const acq = acquisitionStamps(state) // already chronological, so find() yields the earliest
+function sevenContinentStamps(acq: PassportStamp[]): PassportStamp[] {
+  // acq is already chronological, so find() yields the earliest
   const coverage: PassportStamp[] = []
   for (const continent of CONTINENTS) {
     const first = acq.find((s) => byA3.get(s.a3)?.continent === continent)
@@ -66,24 +66,22 @@ function sevenContinentStamps(state: TravelData): PassportStamp[] {
 }
 
 /** Contributing stamps for a badge (chronological; last = earner), or [] if it doesn't apply. */
-function contributingFor(badgeId: string, state: TravelData): PassportStamp[] {
+function contributingFor(badgeId: string, state: TravelData, acq: PassportStamp[]): PassportStamp[] {
   switch (badgeId) {
     case 'first-stamp':
-      return firstN(state, 1)
+      return firstN(acq, 1)
     case 'explorer':
-      return firstN(state, 10)
+      return firstN(acq, 10)
     case 'globetrotter':
-      return firstN(state, 25)
+      return firstN(acq, 25)
     case 'jet-setter':
-      return firstN(state, 50)
+      return firstN(acq, 50)
     case 'bucket-list':
-      return acquisitionStamps(state)
-        .filter((s) => state.countries[s.a3]?.fromBucketList)
-        .slice(0, 1)
+      return acq.filter((s) => state.countries[s.a3]?.fromBucketList).slice(0, 1)
     case 'continent-complete':
-      return continentCompleteStamps(state)
+      return continentCompleteStamps(state, acq)
     case 'seven-continents':
-      return sevenContinentStamps(state)
+      return sevenContinentStamps(acq)
     default:
       return []
   }
@@ -91,10 +89,13 @@ function contributingFor(badgeId: string, state: TravelData): PassportStamp[] {
 
 /** Every earned badge paired with the stamps that earned it (kept consistent with `badge.earned`). */
 export function earnedBadgeStamps(state: TravelData): EarnedBadge[] {
+  // One scan for the stats and one for the acquisition stamps, shared across every badge below.
+  const stats = computeStats(state)
+  const acq = acquisitionStamps(state)
   const result: EarnedBadge[] = []
   for (const badge of BADGES) {
-    if (!badge.earned(state)) continue
-    const contributing = contributingFor(badge.id, state)
+    if (!badge.earned(state, stats)) continue
+    const contributing = contributingFor(badge.id, state, acq)
     if (contributing.length === 0) continue
     result.push({ badge, contributing, earning: contributing[contributing.length - 1] })
   }
