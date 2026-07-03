@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useTravel } from '../travelContext'
-import { BADGES, earnedBadges } from '../data/badges'
+import { computeStats } from '../reducer'
+import { BADGES } from '../data/badges'
 import { CHALLENGES, isComplete } from '../data/challenges'
 import { earnedBadgeStamps, type EarnedBadge } from '../badgeStamps'
 import BadgeDetail from './BadgeDetail'
@@ -9,8 +10,12 @@ import type { TravelData } from '../types'
 type BadgeGridProps = { state: TravelData; onGoToStamp: (a3: string, visitId: string) => void }
 
 function BadgeGrid({ state, onGoToStamp }: BadgeGridProps) {
-  const earned = new Set(earnedBadges(state).map((b) => b.id))
-  const detailById = new Map(earnedBadgeStamps(state).map((e) => [e.badge.id, e]))
+  // Earned ⇔ has a detail entry: one earnedBadgeStamps pass drives both the styling and the
+  // tap-through, so the two can't drift (and opening/closing the detail doesn't recompute it).
+  const detailById = useMemo(
+    () => new Map(earnedBadgeStamps(state).map((e) => [e.badge.id, e])),
+    [state],
+  )
   const [selected, setSelected] = useState<EarnedBadge | null>(null)
 
   return (
@@ -18,14 +23,13 @@ function BadgeGrid({ state, onGoToStamp }: BadgeGridProps) {
       <h2 className="mb-2 text-sm font-bold text-slate-700">Badges</h2>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
         {BADGES.map((b) => {
-          const got = earned.has(b.id)
           const detail = detailById.get(b.id)
           const tile = (
             <>
               <span className="text-3xl" aria-hidden>
                 {b.icon}
               </span>
-              <span className={`text-sm font-semibold ${got ? 'text-green-700' : 'text-slate-600'}`}>
+              <span className={`text-sm font-semibold ${detail ? 'text-green-700' : 'text-slate-600'}`}>
                 {b.label}
               </span>
               <span className="text-xs text-slate-500">{b.description}</span>
@@ -41,10 +45,7 @@ function BadgeGrid({ state, onGoToStamp }: BadgeGridProps) {
               {tile}
             </button>
           ) : (
-            <div
-              key={b.id}
-              className={`${base} ${got ? 'bg-white ring-green-500' : 'bg-slate-50 opacity-60 ring-slate-200'}`}
-            >
+            <div key={b.id} className={`${base} bg-slate-50 opacity-60 ring-slate-200`}>
               {tile}
             </div>
           )
@@ -65,12 +66,13 @@ function BadgeGrid({ state, onGoToStamp }: BadgeGridProps) {
 }
 
 function ChallengeList({ state }: { state: TravelData }) {
+  const stats = useMemo(() => computeStats(state), [state])
   return (
     <section>
       <h2 className="mb-2 text-sm font-bold text-slate-700">Challenges</h2>
       <div className="flex flex-col gap-2">
         {CHALLENGES.map((c) => {
-          const p = c.progress(state)
+          const p = c.progress(state, stats)
           const done = isComplete(p)
           const pct = Math.min(100, Math.round((p.current / p.target) * 100))
           return (

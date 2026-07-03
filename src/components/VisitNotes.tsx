@@ -3,6 +3,7 @@ import { useTravel } from '../travelContext'
 import { getCountry } from '../data/countries'
 import { formatVisitDate } from '../selectors'
 import ConfirmDialog from './ConfirmDialog'
+import Modal, { ModalHeader } from './Modal'
 import PhotosPlaceholder from './PhotosPlaceholder'
 
 type Props = {
@@ -40,30 +41,20 @@ export default function VisitNotes({ a3, visitId, onClose }: Props) {
   }
 
   return (
-    <div
-      onClick={close}
-      className="fixed inset-0 z-30 flex items-center justify-center bg-slate-900/50 p-4"
-    >
-      <div
-        role="dialog"
-        aria-modal="true"
-        onClick={(e) => e.stopPropagation()}
-        className="flex max-h-[80vh] w-[90%] max-w-md flex-col rounded-2xl bg-white shadow-2xl"
-      >
-        <div className="flex items-center justify-between border-b border-slate-100 p-4">
-          <h2 className="flex items-center gap-2 text-lg font-bold text-slate-800">
-            <span aria-hidden>{country?.flag}</span>
-            {country?.name ?? a3}
-            {visit && <span className="font-medium text-slate-400">· {formatVisitDate(visit)}</span>}
-          </h2>
-          <button
-            onClick={close}
-            aria-label="Close"
-            className="rounded-full px-2 text-xl leading-none text-slate-400 hover:text-slate-700"
-          >
-            ×
-          </button>
-        </div>
+    <>
+      <Modal onClose={close}>
+        <ModalHeader
+          title={
+            <>
+              <span aria-hidden>{country?.flag}</span>
+              {country?.name ?? a3}
+              {visit && (
+                <span className="font-medium text-slate-400">· {formatVisitDate(visit)}</span>
+              )}
+            </>
+          }
+          onClose={close}
+        />
 
         {visit ? (
           <div className="flex flex-col gap-4 overflow-y-auto p-4">
@@ -91,7 +82,7 @@ export default function VisitNotes({ a3, visitId, onClose }: Props) {
         ) : (
           <div className="p-8 text-center text-sm text-slate-500">This visit no longer exists.</div>
         )}
-      </div>
+      </Modal>
 
       {confirmRemove && (
         <ConfirmDialog
@@ -101,6 +92,6 @@ export default function VisitNotes({ a3, visitId, onClose }: Props) {
           onCancel={() => setConfirmRemove(false)}
         />
       )}
-    </div>
+    </>
   )
 }

@@ -1,6 +1,6 @@
 # Around the World — Plan
 
-_Last updated: 2026-06-30 · Status: Phases 1–3 built (local prototype runs)_
+_Last updated: 2026-07-03 · Status: prototype complete - Phases 1-3 built plus post-phase polish (schema v3 bucket list, badge-stamp links, map labels, vertical passport timeline)_
 
 ## What this is
 Around the World is a local-first web app for tracking your worldwide travel progress. The
@@ -14,10 +14,12 @@ locally. Travel partners, deal alerts, leaderboards and other social/monetisatio
 intentionally out of scope for now.
 
 ## Feature groups
-- **Map & progress** — world country map; tap to toggle visited; bucket-list state; record visit
-  date; versioned local persistence; progress stats (country count, % of world, continents).
-- **Gamification** — dated passport book on a timeline; milestone badges; predefined
-  auto-progress challenges; random dart throw at an unvisited country.
+- **Map & progress** — world country map with on-map country name labels; tap to toggle visited;
+  bucket-list state; record visit date; versioned local persistence; progress stats (country
+  count, % of world, continents).
+- **Gamification** — dated passport book on a vertical chronological timeline; milestone badges,
+  each linked to the passport stamp(s) that earned it; predefined auto-progress challenges;
+  random dart throw at an unvisited country.
 - **Travel tips / assistant** — contextual per-country info panel (currency, airport→city
   transfer & transport, common phrases, SIM, gov.uk advice, scams, vaccines, entry
   requirements, free ATMs, supermarkets/pharmacists, water, toilet); general trip-prep tools
@@ -42,7 +44,7 @@ across reloads.
   one typed state object, schema `version`, step migrations, re-seed fallback).
 - Progress stats: countries visited count, **% of the world**, continents covered.
 - App shell with a **tab bar** (Map / Passport / Challenges / Tips) — only **Map** is live;
-  the others are placeholders.
+  the others are placeholders. _(The Tips tab was later dropped in Phase 3 - the nav is 3 tabs.)_
 - **Country dataset includes continent and region (sub-region) per country from day one**, so
   Phase 2 challenges/badges and stats can group by them without a data migration.
 **Explicitly not yet:** passport book, badges, challenges, dart, any travel-tips content, the
@@ -176,3 +178,22 @@ confirm all fields show; tap an unseeded country and confirm the "no tips yet" p
   bucket-listed country) powering a new **"Bucket list" badge**. Actions: `setWishlist` /
   `clearCountry` removed, `toggleBucketList` added. Month is shown wherever a visit date appears
   (`formatVisitDate` in `selectors.ts`); Passport still groups by year.
+- 2026-07-01 - **Badges link to the passport stamps that earned them** (built on
+  `feat/badge-stamp-links`, PRs #5/#6). All derived, no persistence: `badgeStamps.ts` maps each
+  earned badge to its *contributing* stamps in chronological order - the last one is the
+  "earning" stamp. Tapping an earned badge on Challenges opens `BadgeDetail.tsx` (a centred-card
+  pop-up listing the stamps) and can jump to the earning stamp on the Passport tab, which
+  scrolls to and briefly highlights it; stamps that earned a badge show the badge icon(s).
+- 2026-07-02 - **Country name labels on the map.** `mapLabels.ts` + `CountryLabels.tsx`: labels
+  appear in zoom tiers (bigger countries first) and are placed at the centroid of each country's
+  largest polygon.
+- 2026-07-02 - **Passport timeline went vertical**: a continuous rail down the left with year
+  markers as nodes and a dot per stamp (`PassportTab.tsx`), replacing plain year-grouped lists.
+- 2026-07-03 - **Post-prototype maintenance pass** (on `maintenance/post-prototype-tidy`):
+  extracted the shared `Modal`/`ModalHeader` shell used by all five pop-ups; deduplicated stamp
+  construction (`stampFor`) and month formatting (`monthName`) into `selectors.ts`; derivation
+  passes now compute stats/acquisition stamps once and thread them through; removed dead
+  exports; replaced the stock Vite README with a real one and added a per-project `CLAUDE.md`.
+  Reaffirmed: **no test runner** - build type-check + lint stay the only gates. Noted that
+  `prop-types` must remain a direct dependency (react-simple-maps needs it; removing it breaks
+  the build under `--legacy-peer-deps`).

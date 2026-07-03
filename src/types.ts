@@ -1,4 +1,4 @@
-// Domain model for Around the World (Phase 1 — the scratch map).
+// Domain model for Around the World (schema v3: dated visits with notes + bucket list).
 
 export type CountryStatus = 'visited' | 'bucketlist' // absence of an entry == unvisited
 

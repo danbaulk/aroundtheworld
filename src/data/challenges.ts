@@ -1,6 +1,6 @@
 // Curated challenges with auto-progress — purely derived from visited data (no persistence).
 import type { TravelData } from '../types'
-import { computeStats, statusOf } from '../reducer'
+import { statusOf, type Stats } from '../reducer'
 import { COUNTRIES } from './countries'
 
 export type ChallengeProgress = { current: number; target: number }
@@ -9,7 +9,8 @@ export type Challenge = {
   id: string
   label: string
   description: string
-  progress: (state: TravelData) => ChallengeProgress
+  /** Callers compute stats once per pass and thread it in, so each challenge doesn't rescan the map. */
+  progress: (state: TravelData, stats: Stats) => ChallengeProgress
 }
 
 // Nordic is narrower than the "Northern Europe" subregion (which also includes the UK, Ireland,
@@ -29,7 +30,7 @@ export const CHALLENGES: Challenge[] = [
     id: 'seven-continents',
     label: 'Around the world',
     description: 'Set foot on all 7 continents.',
-    progress: (s) => ({ current: computeStats(s).continentsCovered, target: 7 }),
+    progress: (_, stats) => ({ current: stats.continentsCovered, target: 7 }),
   },
   {
     id: 'nordic',
@@ -53,7 +54,7 @@ export const CHALLENGES: Challenge[] = [
     id: 'century-club',
     label: 'Century club',
     description: 'Visit 100 countries.',
-    progress: (s) => ({ current: computeStats(s).visitedCount, target: 100 }),
+    progress: (_, stats) => ({ current: stats.visitedCount, target: 100 }),
   },
 ]
 
