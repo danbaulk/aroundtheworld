@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTravel } from '../travelContext'
 import { monthName, passportByYear } from '../selectors'
 import { badgesByStamp, stampKey } from '../badgeStamps'
@@ -15,8 +15,10 @@ type Props = {
 // & briefly highlighted when arrived at from the Challenges tab.
 export default function PassportTab({ focus = null, onFocusHandled }: Props) {
   const { state } = useTravel()
-  const years = passportByYear(state)
-  const bStamps = badgesByStamp(state)
+  // Memoised on state: highlight-timer ticks and the notes pop-up re-render this tab without
+  // changing the data, so don't rebuild every stamp and re-run the badge derivation each time.
+  const years = useMemo(() => passportByYear(state), [state])
+  const bStamps = useMemo(() => badgesByStamp(state), [state])
   const stampCount = years.reduce((n, y) => n + y.stamps.length, 0)
   const [open, setOpen] = useState<{ a3: string; visitId: string } | null>(null)
 
@@ -70,7 +72,8 @@ export default function PassportTab({ focus = null, onFocusHandled }: Props) {
                 const sKey = stampKey(s.a3, s.visitId)
                 const earnedHere = bStamps.get(sKey)
                 const isHi = highlight === sKey
-                const isFocus = focus?.a3 === s.a3 && focus?.visitId === s.visitId
+                const isFocus = sKey === focusKey
+                const month = monthName(s.month)
                 return (
                   <button
                     key={s.visitId}
@@ -89,9 +92,7 @@ export default function PassportTab({ focus = null, onFocusHandled }: Props) {
                     </span>
                     <span className="text-sm font-medium text-slate-700">
                       {s.name}
-                      {monthName(s.month) && (
-                        <span className="font-normal text-slate-400"> ({monthName(s.month)})</span>
-                      )}
+                      {month && <span className="font-normal text-slate-400"> ({month})</span>}
                     </span>
                     {earnedHere && (
                       <span

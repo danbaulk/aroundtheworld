@@ -1,6 +1,7 @@
 import type { Badge } from '../data/badges'
 import type { PassportStamp } from '../selectors'
 import { formatVisitDate } from '../selectors'
+import { stampKey } from '../badgeStamps'
 import Modal, { ModalHeader } from './Modal'
 
 type Props = {
@@ -16,6 +17,7 @@ type Props = {
 // badge (the last one chronologically) is marked; tapping any row — or the primary button — jumps
 // to that stamp on the Passport tab.
 export default function BadgeDetail({ badge, contributing, earning, onGoToStamp, onClose }: Props) {
+  const earningKey = stampKey(earning.a3, earning.visitId)
   const go = (a3: string, visitId: string) => {
     onGoToStamp(a3, visitId)
     onClose()
@@ -42,9 +44,10 @@ export default function BadgeDetail({ badge, contributing, earning, onGoToStamp,
         </p>
         <ul className="flex flex-col gap-1.5">
           {contributing.map((s) => {
-            const isEarner = s.a3 === earning.a3 && s.visitId === earning.visitId
+            const sKey = stampKey(s.a3, s.visitId)
+            const isEarner = sKey === earningKey
             return (
-              <li key={`${s.a3}:${s.visitId}`}>
+              <li key={sKey}>
                 <button
                   onClick={() => go(s.a3, s.visitId)}
                   className={`flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left ring-1 transition ${

@@ -18,6 +18,11 @@ export const CONTINENTS: readonly Continent[] = [
 /** Lookup by ISO alpha-3 (the key used for persisted state). */
 export const byA3: ReadonlyMap<string, Country> = new Map(COUNTRIES.map((c) => [c.a3, c]))
 
+/** UN-member countries per continent, precomputed once (the dataset is static). */
+export const membersByContinent: ReadonlyMap<Continent, Country[]> = new Map(
+  CONTINENTS.map((continent) => [continent, COUNTRIES.filter((c) => c.counts && c.continent === continent)]),
+)
+
 /** Lookup by ISO numeric id (matches the ids on world-atlas TopoJSON features). */
 const byNumericId: ReadonlyMap<string, Country> = new Map(
   COUNTRIES.filter((c) => c.numericId !== '').map((c) => [c.numericId, c]),

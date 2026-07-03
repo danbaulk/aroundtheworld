@@ -1,9 +1,9 @@
 type ModalProps = {
   onClose: () => void
   role?: 'dialog' | 'alertdialog'
-  /** Render above another open modal: higher z-index, and keep the backdrop click from closing the parent. */
+  /** Render above another open overlay: higher z-index, and swallow the backdrop click so it can't reach handlers underneath. */
   topmost?: boolean
-  /** Card sizing/layout; the rounded white card chrome is always applied. */
+  /** Extra card sizing classes, added to the shared layout + chrome (which are always applied). */
   cardClassName?: string
   children: React.ReactNode
 }
@@ -15,7 +15,7 @@ export default function Modal({
   onClose,
   role = 'dialog',
   topmost = false,
-  cardClassName = 'flex max-h-[80vh] w-[90%] max-w-md flex-col',
+  cardClassName = 'max-h-[80vh] max-w-md',
   children,
 }: ModalProps) {
   return (
@@ -30,7 +30,7 @@ export default function Modal({
         role={role}
         aria-modal="true"
         onClick={(e) => e.stopPropagation()}
-        className={`${cardClassName} rounded-2xl bg-white shadow-2xl`}
+        className={`flex w-[90%] flex-col rounded-2xl bg-white shadow-2xl ${cardClassName}`}
       >
         {children}
       </div>
@@ -39,7 +39,7 @@ export default function Modal({
 }
 
 type ModalHeaderProps = {
-  /** Content of the heading — typically a flag/icon span followed by the name. */
+  /** Content of the heading - typically a flag/icon span followed by the name. */
   title: React.ReactNode
   subtitle?: React.ReactNode
   onClose: () => void

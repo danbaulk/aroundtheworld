@@ -1,7 +1,7 @@
 // Milestone badges — purely derived from visited data (no persistence). Shown on the Challenges tab.
 import type { TravelData } from '../types'
-import { computeStats, statusOf, type Stats } from '../reducer'
-import { COUNTRIES, CONTINENTS } from './countries'
+import { statusOf, type Stats } from '../reducer'
+import { CONTINENTS, membersByContinent } from './countries'
 
 export type Badge = {
   id: string
@@ -14,7 +14,7 @@ export type Badge = {
 
 /** A continent is "complete" when every UN-member country in it is visited (Antarctica has none, so it's excluded). */
 export function continentComplete(state: TravelData, continent: (typeof CONTINENTS)[number]): boolean {
-  const members = COUNTRIES.filter((c) => c.counts && c.continent === continent)
+  const members = membersByContinent.get(continent) ?? []
   return members.length > 0 && members.every((c) => statusOf(state, c.a3) === 'visited')
 }
 
@@ -27,9 +27,3 @@ export const BADGES: Badge[] = [
   { id: 'continent-complete', icon: '🧭', label: 'Continent complete', description: 'Visit every country in a single continent.', earned: (s) => CONTINENTS.some((c) => continentComplete(s, c)) },
   { id: 'seven-continents', icon: '🌐', label: 'Seven continents', description: 'Set foot on all 7 continents.', earned: (_, stats) => stats.continentsCovered === 7 },
 ]
-
-/** The badges earned for the current state. */
-export function earnedBadges(state: TravelData): Badge[] {
-  const stats = computeStats(state)
-  return BADGES.filter((b) => b.earned(state, stats))
-}

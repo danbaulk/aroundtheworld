@@ -11,12 +11,7 @@ type Props = {
 // (hence topmost). Confirm is styled rose to read as destructive.
 export default function ConfirmDialog({ message, confirmLabel, onConfirm, onCancel }: Props) {
   return (
-    <Modal
-      onClose={onCancel}
-      role="alertdialog"
-      topmost
-      cardClassName="flex w-[90%] max-w-xs flex-col gap-4 p-5"
-    >
+    <Modal onClose={onCancel} role="alertdialog" topmost cardClassName="max-w-xs gap-4 p-5">
       <p className="text-sm text-slate-700">{message}</p>
       <div className="flex justify-end gap-2">
         <button

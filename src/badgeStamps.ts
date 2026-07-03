@@ -5,7 +5,7 @@ import type { TravelData } from './types'
 import { computeStats } from './reducer'
 import { byMonthThenName, stampFor, type PassportStamp } from './selectors'
 import { BADGES, continentComplete, type Badge } from './data/badges'
-import { COUNTRIES, CONTINENTS, byA3 } from './data/countries'
+import { CONTINENTS, byA3, membersByContinent } from './data/countries'
 
 /** Stable key for a single stamp (country + visit) — shared with the Passport tab lookup. */
 export const stampKey = (a3: string, visitId: string): string => `${a3}:${visitId}`
@@ -41,7 +41,7 @@ function continentCompleteStamps(state: TravelData, acq: PassportStamp[]): Passp
   let best: PassportStamp[] | null = null
   for (const continent of CONTINENTS) {
     if (!continentComplete(state, continent)) continue
-    const members = COUNTRIES.filter((c) => c.counts && c.continent === continent)
+    const members = membersByContinent.get(continent) ?? []
     const stamps = members
       .map((c) => acqByA3.get(c.a3))
       .filter((s): s is PassportStamp => Boolean(s))
