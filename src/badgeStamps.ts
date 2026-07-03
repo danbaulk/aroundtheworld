@@ -1,27 +1,15 @@
 // Maps each earned badge back to the passport stamps that earned it (no persistence — all derived).
 // For every earned badge we produce its *contributing* stamps in chronological order; the LAST one
 // is the "earning" stamp — the visit whose addition first made the badge true. See docs table.
-import type { TravelData, Visit } from './types'
-import { byMonthThenName, type PassportStamp } from './selectors'
+import type { TravelData } from './types'
+import { byMonthThenName, stampFor, type PassportStamp } from './selectors'
 import { BADGES, continentComplete, type Badge } from './data/badges'
-import { COUNTRIES, CONTINENTS, byA3, getCountry } from './data/countries'
+import { COUNTRIES, CONTINENTS, byA3 } from './data/countries'
 
 /** Stable key for a single stamp (country + visit) — shared with the Passport tab lookup. */
 export const stampKey = (a3: string, visitId: string): string => `${a3}:${visitId}`
 
 export type EarnedBadge = { badge: Badge; contributing: PassportStamp[]; earning: PassportStamp }
-
-function stampFor(a3: string, visit: Visit): PassportStamp {
-  const country = getCountry(a3)
-  return {
-    a3,
-    visitId: visit.id,
-    year: visit.year,
-    month: visit.month,
-    name: country?.name ?? a3,
-    flag: country?.flag ?? '🏳️',
-  }
-}
 
 /** Chronological: year, then month (unknown sorts first), then name, then visitId (stable). */
 function byChrono(a: PassportStamp, b: PassportStamp): number {

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTravel } from '../travelContext'
-import { MONTHS, passportByYear } from '../selectors'
+import { monthName, passportByYear } from '../selectors'
 import { badgesByStamp, stampKey } from '../badgeStamps'
 import VisitNotes from './VisitNotes'
 
@@ -89,8 +89,8 @@ export default function PassportTab({ focus = null, onFocusHandled }: Props) {
                     </span>
                     <span className="text-sm font-medium text-slate-700">
                       {s.name}
-                      {s.month && MONTHS[s.month] && (
-                        <span className="font-normal text-slate-400"> ({MONTHS[s.month]})</span>
+                      {monthName(s.month) && (
+                        <span className="font-normal text-slate-400"> ({monthName(s.month)})</span>
                       )}
                     </span>
                     {earnedHere && (

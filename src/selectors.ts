@@ -23,10 +23,28 @@ export const MONTHS = [
   'Dec',
 ] as const
 
+/** The short name for a 1–12 month number, or '' when the month is absent or out of range. */
+export function monthName(month?: number): string {
+  return month && month >= 1 && month <= 12 ? MONTHS[month] : ''
+}
+
 /** A visit's date for display: "Mar 2024" when the month is known, else just "2024". */
 export function formatVisitDate(visit: Pick<Visit, 'year' | 'month'>): string {
-  const name = visit.month && visit.month >= 1 && visit.month <= 12 ? MONTHS[visit.month] : ''
+  const name = monthName(visit.month)
   return name ? `${name} ${visit.year}` : `${visit.year}`
+}
+
+/** The passport stamp for one visit to a country (falls back to the raw a3 / a plain flag). */
+export function stampFor(a3: string, visit: Visit): PassportStamp {
+  const country = getCountry(a3)
+  return {
+    a3,
+    visitId: visit.id,
+    year: visit.year,
+    month: visit.month,
+    name: country?.name ?? a3,
+    flag: country?.flag ?? '🏳️',
+  }
 }
 
 /** Chronological within a year: month ascending (unknown months first), then name A–Z. */
@@ -45,16 +63,8 @@ export function passportByYear(state: TravelData): PassportYear[] {
   const byYear = new Map<number, PassportStamp[]>()
   for (const [a3, entry] of Object.entries(state.countries)) {
     if (entry.status !== 'visited' || !entry.visits) continue
-    const country = getCountry(a3)
     for (const visit of entry.visits) {
-      const stamp: PassportStamp = {
-        a3,
-        visitId: visit.id,
-        year: visit.year,
-        month: visit.month,
-        name: country?.name ?? a3,
-        flag: country?.flag ?? '🏳️',
-      }
+      const stamp = stampFor(a3, visit)
       const list = byYear.get(visit.year)
       if (list) list.push(stamp)
       else byYear.set(visit.year, [stamp])
