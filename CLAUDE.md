@@ -78,7 +78,7 @@ used when jumping from a badge to the stamp that earned it.
 
 ## Project plan
 
-`docs/PROJECT_PLAN.md` is the source of truth for scope, phasing, rejected ideas and the
+`.docs/PROJECT_PLAN.md` is the source of truth for scope, phasing, rejected ideas and the
 decisions log - read it before starting new feature work. The prototype is complete: Phases
 1-3 (map, gamification, travel tips) plus post-phase polish (multiple dated visits with notes,
 bucket list, badge-stamp links, map labels, vertical passport timeline). Travel partners,
