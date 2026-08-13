@@ -42,5 +42,5 @@ State is one typed `TravelData` object persisted to `localStorage` under
 `aroundtheworld:data`, with a schema version (currently v3) and forward-only step migrations
 in `src/storage.ts`.
 
-See `docs/PROJECT_PLAN.md` for scope, phasing and the decisions log, and `CLAUDE.md` for the
-architecture guide.
+See `aroundtheworld/PROJECT_PLAN.md` in the private `danbaulk/docs` repo for scope, phasing and
+the decisions log, and `CLAUDE.md` for the architecture guide.

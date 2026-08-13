@@ -78,8 +78,10 @@ used when jumping from a badge to the stamp that earned it.
 
 ## Project plan
 
-`.docs/PROJECT_PLAN.md` is the source of truth for scope, phasing, rejected ideas and the
-decisions log - read it before starting new feature work. The prototype is complete: Phases
+The plan is the source of truth for scope, phasing, rejected ideas and the decisions log - read it
+before starting new feature work. It lives in the private
+[`danbaulk/docs`](https://github.com/danbaulk/docs) repo at `aroundtheworld/PROJECT_PLAN.md`
+(clone it alongside this one as `~/dev/docs`). The prototype is complete: Phases
 1-3 (map, gamification, travel tips) plus post-phase polish (multiple dated visits with notes,
 bucket list, badge-stamp links, map labels, vertical passport timeline). Travel partners,
 accounts/backend/sync and monetisation features are explicitly deferred to future
